@@ -29,6 +29,10 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      - name: Set Magento Auth
+        shell: bash
+        run: composer config --global http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
+
       - name: Install Coding Standard
         shell: bash
         working-directory: standard
@@ -57,8 +61,8 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v3
         with:
-         fetch-depth: 0
-         path: project
+          fetch-depth: 0
+          path: project
 
       - name: Create Standard Directory
         shell: bash

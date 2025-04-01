@@ -36,7 +36,7 @@ jobs:
         run: echo "files=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)" >> $GITHUB_OUTPUT
         if: github.event_name == 'pull_request'
 
-      - name: Run Larastan
+      - name: Run PHPStan
         run: |
           FILES="${{ steps.changed-files.outputs.files }}"
           if [ -z "$FILES" ]; then

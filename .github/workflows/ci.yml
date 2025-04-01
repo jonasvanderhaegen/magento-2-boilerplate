@@ -29,14 +29,12 @@ jobs:
           tools: composer:v2
           coverage: none
 
-      - name: Set Magento Auth
-        shell: bash
-        run: composer config --global http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
-
       - name: Install Coding Standard
         shell: bash
         working-directory: standard
-        run: composer require "magento/magento-coding-standard"
+        run: |
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer require "magento/magento-coding-standard"
 
       - name: Register Coding Standard
         shell: bash
@@ -75,6 +73,10 @@ jobs:
           extensions: mbstring, intl, soap, bcmath, gd, xml
           tools: composer:v2.2
           coverage: none
+
+      - name: Set Magento Auth
+        shell: bash
+        run: composer config http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
 
       - name: Install PHPstan
         shell: bash

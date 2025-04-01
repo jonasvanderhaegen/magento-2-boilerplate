@@ -1,4 +1,5 @@
 name: M2 K&R check
+
 on:
   push:
     branches:
@@ -18,10 +19,6 @@ jobs:
           fetch-depth: 0
           path: project
 
-      - name: Create Standard Directory
-        shell: bash
-        run: mkdir standard
-
       - name: Set PHP Version
         uses: shivammathur/setup-php@v2
         with:
@@ -29,17 +26,19 @@ jobs:
           tools: composer:v2
           coverage: none
 
-      - name: Install Coding Standard
+      - name: Set Magento Auth
         shell: bash
-        working-directory: standard
-        run: |
-          composer require "magento/magento-coding-standard"
-          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+        run: composer config --global http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
+
+      - name: Install Dependencies
+        shell: bash
+        working-directory: project
+        run: composer install --no-interaction --prefer-dist
 
       - name: Register Coding Standard
         shell: bash
-        working-directory: standard
-        run: vendor/bin/phpcs --config-set installed_paths ${{ github.workspace }}/standard/vendor/magento/magento-coding-standard,${{ github.workspace }}/standard/vendor/phpcompatibility/php-compatibility
+        working-directory: project
+        run: vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard,vendor/phpcompatibility/php-compatibility
 
       - name: Get Changed Files
         shell: bash
@@ -50,8 +49,14 @@ jobs:
 
       - name: Coding Standard Check
         shell: bash
-        run: ../standard/vendor/bin/phpcs --standard=ruleset.xml ${{ github.event_name == 'pull_request' && steps.changed-files.outputs.files || 'app/code' }}
         working-directory: project
+        run: |
+          FILES="${{ steps.changed-files.outputs.files }}"
+          if [ -z "$FILES" ]; then
+            FILES="app/code"
+          fi
+          vendor/bin/phpcs --standard=ruleset.xml $FILES
+
   phpstan:
     name: M2 PHPStan
     runs-on: ubuntu-latest
@@ -61,10 +66,6 @@ jobs:
         with:
           fetch-depth: 0
           path: project
-
-      - name: Create Standard Directory
-        shell: bash
-        run: mkdir standard
 
       - name: Set PHP Version
         uses: shivammathur/setup-php@v2
@@ -78,10 +79,10 @@ jobs:
         shell: bash
         run: composer config --global http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
 
-      - name: Install PHPstan
+      - name: Install Dependencies
         shell: bash
         working-directory: project
-        run: composer install
+        run: composer install --no-interaction --prefer-dist
 
       - name: Get Changed Files
         shell: bash
@@ -90,7 +91,12 @@ jobs:
         run: echo "files=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)" >> $GITHUB_OUTPUT
         if: github.event_name == 'pull_request'
 
-      - name: PHPstan Check
+      - name: PHPStan Check
         shell: bash
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --error-format=github ${{ github.event_name == 'pull_request' && steps.changed-files.outputs.files || 'app/code' }}
         working-directory: project
+        run: |
+          FILES="${{ steps.changed-files.outputs.files }}"
+          if [ -z "$FILES" ]; then
+            FILES="app/code"
+          fi
+          vendor/bin/phpstan analyse --configuration=phpstan.neon --error-format=github $FILES

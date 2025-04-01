@@ -1,4 +1,4 @@
-name: M2 K&R check
+name: M2 Coding standard
 
 on:
   push:
@@ -38,7 +38,10 @@ jobs:
       - name: Register Coding Standard
         shell: bash
         working-directory: project
-        run: vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard,vendor/phpcompatibility/php-compatibility
+        run: |
+          vendor/bin/phpcs --config-set installed_paths \
+          vendor/magento/magento-coding-standard,\
+          vendor/phpcompatibility/php-compatibility
 
       - name: Get Changed Files
         shell: bash

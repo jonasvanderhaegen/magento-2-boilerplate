@@ -19,7 +19,7 @@ jobs:
       - name: Set Up PHP
         uses: ./.github/actions/setup
         with:
-          php-version: "8.2"
+          php-version: "8.3"
           php-extensions: "mbstring, intl, soap, bcmath, gd, xml"
 
       - name: "Set Magento Auth"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+## This will only work if your hosting provider would be Hypernode. For other hostingproviders you'll have to rewrite several lines.
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DIR="$DIR/.."
+
+echo "downloading"
+(cd "$DIR" && exec vendor/bin/dep magento:backup:download foobar.hypernode.io)
+echo "uploading"
+(cd "$DIR" && exec vendor/bin/dep database:upload:acc foobarstaging.hypernode.io)
+echo "converting"
+(cd "$DIR" && exec vendor/bin/dep database:convert:acc foobarstaging.hypernode.io)
+echo "cleanup"
+(cd "$DIR" && rm var/backups/database.sql.gz)

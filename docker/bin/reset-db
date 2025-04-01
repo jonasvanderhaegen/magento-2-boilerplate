@@ -1,0 +1,32 @@
+#!/bin/bash
+bin/clinotty rm app/etc/env.php
+
+bin/magento setup:install \
+--base-url='https://m2.test/' \
+--base-url-secure='https://m2.test/' \
+--db-host='db' \
+--db-name='magento' \
+--db-user='magento' \
+--db-password='magento' \
+--backend-frontname='admin' \
+--admin-firstname='John' \
+--admin-lastname='Doe' \
+--admin-email='johndoe@example.com' \
+--admin-user='admin' \
+--admin-password='admin123!' \
+--language='en_US' \
+--currency='EUR' \
+--timezone='Europe/Brussels' \
+--use-rewrites=1 \
+--session-save='files' \
+--cleanup-database \
+--use-secure=1 \
+--use-secure-admin=1 \
+--key='08204b4d318e9616e6de1669de1af09a' \
+--search-engine='elasticsearch7' \
+--elasticsearch-host='opensearch' \
+--elasticsearch-port='9200' \
+--elasticsearch-index-prefix='magento2' \
+--sales-order-increment-prefix='ORD'
+
+bin/copyfromcontainer app/etc/env.php

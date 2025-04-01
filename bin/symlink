@@ -1,0 +1,12 @@
+STR=$PWD;
+SOURCE="'$STR'";
+TARGET="'$STR/docker/src'";
+
+echo 'MAC/LINUX';
+echo '';
+echo "ln -s" $SOURCE $TARGET;
+#echo '';
+#echo '';
+#echo 'WINDOWS';
+#echo '';
+#echo "mklink /D" $SOURCE $TARGET;

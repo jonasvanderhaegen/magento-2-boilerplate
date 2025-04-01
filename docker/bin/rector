@@ -1,0 +1,6 @@
+#!/bin/bash
+[ -z "$1" ] && echo "Please specify a path (ex. app/code/Foobar/CreateAccount)" && exit
+
+bin/cli vendor/bin/rector process "$@" --dry-run
+
+echo "Run 'bin/cli vendor/bin/rector process "$@"' to apply the changes"

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+## This will only work if your hosting provider would be Hypernode. For other hostingproviders you'll have to rewrite several lines.
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DIR="$DIR/.."
+DOCKER_DIR="$DIR"/"$(cd "$DIR" && exec ls -d docker-*/)"
+
+echo "downloading"
+(cd "$DIR" && exec vendor/bin/dep magento:backup:download foobar.hypernode.io)
+echo "unzipping"
+(cd "$DIR" && rm -f var/backups/database.sql)
+(cd "$DIR" && gunzip var/backups/database.sql.gz)
+echo "fixing"
+(sed -i '' 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g' "$DIR"/var/backups/database.sql)
+(sed -i '' 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' "$DIR"/var/backups/database.sql)
+echo "importing"
+#(cd "$DOCKER_DIR" && bin/mysql < "$DIR"/var/backups/database.sql)
+(cd "$DOCKER_DIR" && pv "$DIR"/var/backups/database.sql | bin/mysql)
+echo "converting"
+(cd "$DOCKER_DIR" && bin/mysql < "$DIR"/db/prod-to-dev.sql)
+echo "cleanup"
+(cd "$DIR" && rm -f var/backups/database.sql)
+echo "database upgrading"
+(cd "$DOCKER_DIR" && exec bin/magento setup:upgrade)
+echo "Downloading some media files"
+(cd "$DIR" && exec vendor/bin/dep media:download foobar.hypernode.io)
+
+echo "creating admin user"
+(cd "$DOCKER_DIR" && exec bin/magento admin:user:create --admin-user=admin --admin-password=admin123 --admin-email=magentoadmin@dispostable.com --admin-firstname=admin --admin-lastname=admin)

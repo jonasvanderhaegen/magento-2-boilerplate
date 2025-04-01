@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<ruleset name="FoobarStandard" namespace="Foobar\CS\FoobarStandard">
+    <description>A custom Foobar coding standard</description>
+    <rule ref="Magento2">
+        <exclude name="Magento2.Commenting.ClassPropertyPHPDocFormatting.Missing" />
+        <exclude name="Magento2.Annotation.MethodAnnotationStructure.MethodArguments" />
+        <exclude name="Magento2.Annotation.MethodArguments.NoCommentBlock" />
+        <exclude name="Magento2.Annotation.MethodAnnotationStructure.MethodAnnotation" />
+    </rule>
+
+    <exclude-pattern>deploy.php</exclude-pattern>
+    <exclude-pattern>scripts/*</exclude-pattern>
+</ruleset>

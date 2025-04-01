@@ -1,0 +1,45 @@
+name: M2 PHPStan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up PHP
+        uses: ./.github/actions/setup
+        with:
+          php-version: "8.2"
+          php-extensions: "mbstring, intl, soap, bcmath, gd, xml"
+
+      - name: "Set Magento Auth"
+        shell: bash
+        run: composer config --global http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
+
+      - name: Install Composer Dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Get Changed Files
+        shell: bash
+        working-directory: project
+        id: changed-files
+        run: echo "files=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)" >> $GITHUB_OUTPUT
+        if: github.event_name == 'pull_request'
+
+      - name: Run Larastan
+        run: |
+          FILES="${{ steps.changed-files.outputs.files }}"
+          if [ -z "$FILES" ]; then
+             FILES="app/code"
+          fi
+          vendor/bin/phpstan analyse --no-progress --configuration=phpstan.neon --memory-limit=2G --error-format=github $FILES
